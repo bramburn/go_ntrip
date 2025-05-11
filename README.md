@@ -1,5 +1,8 @@
 # Go NTRIP Client for TOPGNSS TOP708
 
+[![Go Tests](https://github.com/bramburn/go_ntrip/actions/workflows/go-test.yml/badge.svg)](https://github.com/bramburn/go_ntrip/actions/workflows/go-test.yml)
+[![Go CI](https://github.com/bramburn/go_ntrip/actions/workflows/go-ci.yml/badge.svg)](https://github.com/bramburn/go_ntrip/actions/workflows/go-ci.yml)
+
 A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial USB connection.
 
 ## Features
@@ -132,6 +135,16 @@ If you encounter connection issues:
 ```
 go test ./test/...
 ```
+
+### Continuous Integration
+
+This project uses GitHub Actions for continuous integration:
+
+- **Go Tests**: Runs all tests to ensure functionality works correctly
+- **Go CI**: Performs linting, building, and test coverage reporting
+- **Go Format**: Ensures code follows Go formatting standards
+
+All workflows run automatically on push to main and on pull requests.
 
 ### Adding New Features
 

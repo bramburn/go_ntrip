@@ -1,0 +1,31 @@
+name: Go Format
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  format:
+    name: Check Code Format
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        check-latest: true
+
+    - name: Check formatting
+      run: |
+        if (gofmt -l . | Select-String -Pattern ".") {
+          Write-Error "The following files are not formatted correctly:"
+          gofmt -l .
+          exit 1
+        } else {
+          Write-Host "All Go files are properly formatted."
+        }
