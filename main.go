@@ -475,7 +475,14 @@ func displayNMEA(sentence NMEASentence) {
 		fmt.Printf("\n[%s] Recommended Minimum Navigation Information\n", sentence.Type)
 		if len(sentence.Fields) >= 12 {
 			fmt.Printf("  Time: %s UTC\n", formatNMEATime(sentence.Fields[0]))
-			fmt.Printf("  Status: %s\n", sentence.Fields[1] == "A" ? "Active" : "Void")
+
+			// Status field
+			status := "Void"
+			if sentence.Fields[1] == "A" {
+				status = "Active"
+			}
+			fmt.Printf("  Status: %s\n", status)
+
 			fmt.Printf("  Latitude: %s %s\n", formatNMEALatLon(sentence.Fields[2]), sentence.Fields[3])
 			fmt.Printf("  Longitude: %s %s\n", formatNMEALatLon(sentence.Fields[4]), sentence.Fields[5])
 			fmt.Printf("  Speed: %s knots\n", sentence.Fields[6])
@@ -495,7 +502,13 @@ func displayNMEA(sentence NMEASentence) {
 	case strings.HasSuffix(sentence.Type, "GSA"):
 		fmt.Printf("\n[%s] GPS DOP and Active Satellites\n", sentence.Type)
 		if len(sentence.Fields) >= 17 {
-			fmt.Printf("  Mode: %s\n", sentence.Fields[0] == "A" ? "Automatic" : "Manual")
+			// Mode field
+			mode := "Manual"
+			if sentence.Fields[0] == "A" {
+				mode = "Automatic"
+			}
+			fmt.Printf("  Mode: %s\n", mode)
+
 			fmt.Printf("  Fix Type: %s\n", getFixType(sentence.Fields[1]))
 			fmt.Printf("  PDOP: %s\n", sentence.Fields[14])
 			fmt.Printf("  HDOP: %s\n", sentence.Fields[15])
@@ -508,7 +521,13 @@ func displayNMEA(sentence NMEASentence) {
 			fmt.Printf("  Latitude: %s %s\n", formatNMEALatLon(sentence.Fields[0]), sentence.Fields[1])
 			fmt.Printf("  Longitude: %s %s\n", formatNMEALatLon(sentence.Fields[2]), sentence.Fields[3])
 			fmt.Printf("  Time: %s UTC\n", formatNMEATime(sentence.Fields[4]))
-			fmt.Printf("  Status: %s\n", sentence.Fields[5] == "A" ? "Valid" : "Invalid")
+
+			// Status field
+			status := "Invalid"
+			if sentence.Fields[5] == "A" {
+				status = "Valid"
+			}
+			fmt.Printf("  Status: %s\n", status)
 		}
 
 	default:
