@@ -11,8 +11,25 @@ A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial
   - NMEA-0183 sentences with detailed parsing and display
   - RTCM3.3 messages for RTK corrections
   - u-blox UBX protocol messages
-- Comprehensive error handling and connection troubleshooting
-- Baud rate adjustment capability
+- Comprehensive error handling and troubleshooting tips
+- Modular design following SOLID principles
+
+## Project Structure
+
+```
+go_ntrip/
+├── build/              # Build output directory
+├── cmd/                # Application entry points
+│   └── gnss/           # Main GNSS application
+├── internal/           # Private application code
+│   ├── device/         # GNSS device communication
+│   ├── parser/         # NMEA/RTCM/UBX parsers
+│   ├── port/           # Serial port handling
+│   └── ui/             # User interface code
+├── pkg/                # Public packages
+├── scripts/            # Build scripts
+└── test/               # Test files
+```
 
 ## Prerequisites
 
@@ -32,12 +49,31 @@ A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial
    go mod tidy
    ```
 
-## Usage
+## Building
 
-Run the application:
+### Windows
+
+Run the build script:
 
 ```
-go run main.go
+cd scripts
+build.bat
+```
+
+The executable will be created in the `build` directory.
+
+## Usage
+
+Run the executable:
+
+```
+build/gnss_receiver.exe
+```
+
+Or run directly with Go:
+
+```
+go run cmd/gnss/main.go
 ```
 
 ### Commands
@@ -88,6 +124,22 @@ If you encounter connection issues:
 3. Try a different USB port
 4. Ensure the correct drivers are installed
 5. Try restarting the GNSS receiver
+
+## Development
+
+### Running Tests
+
+```
+go test ./test/...
+```
+
+### Adding New Features
+
+The modular design makes it easy to add new features:
+
+1. To add a new parser, implement a new parser in the `internal/parser` package
+2. To add a new device, implement the `GNSSDevice` interface in the `internal/device` package
+3. To add a new UI, implement a new UI in the `internal/ui` package
 
 ## Future Development
 
