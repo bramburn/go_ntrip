@@ -2,6 +2,7 @@ package device
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -174,11 +175,26 @@ func (d *TOPGNSSDevice) GetPortDetails() ([]PortDetail, error) {
 
 	var result []PortDetail
 	for _, detail := range details {
+		// Convert string VID/PID to uint16 if they are USB devices
+		vid := uint16(0)
+		pid := uint16(0)
+
+		if detail.IsUSB {
+			// Parse hexadecimal VID/PID strings to uint16
+			if vidVal, err := parseHexToUint16(detail.VID); err == nil {
+				vid = vidVal
+			}
+
+			if pidVal, err := parseHexToUint16(detail.PID); err == nil {
+				pid = pidVal
+			}
+		}
+
 		result = append(result, PortDetail{
 			Name:    detail.Name,
 			IsUSB:   detail.IsUSB,
-			VID:     detail.VID,
-			PID:     detail.PID,
+			VID:     vid,
+			PID:     pid,
 			Product: detail.Product,
 		})
 	}
@@ -264,4 +280,18 @@ func (d *TOPGNSSDevice) MonitorNMEA(config MonitorConfig) error {
 // StopMonitoring stops all monitoring activities
 func (d *TOPGNSSDevice) StopMonitoring() {
 	d.stopChan <- true
+}
+
+// parseHexToUint16 converts a hexadecimal string to uint16
+func parseHexToUint16(hexStr string) (uint16, error) {
+	// Remove 0x prefix if present
+	hexStr = strings.TrimPrefix(hexStr, "0x")
+
+	// Parse the hex string
+	val, err := strconv.ParseUint(hexStr, 16, 16)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint16(val), nil
 }

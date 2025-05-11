@@ -43,7 +43,7 @@ func (p *RTCMParser) Process(data []byte) []RTCMMessage {
 			if len(p.buffer) >= totalLength {
 				// We have a complete message
 				messageType := (int(p.buffer[3]) << 4) | (int(p.buffer[4]) >> 4)
-				
+
 				// Create message
 				message := RTCMMessage{
 					MessageType: messageType,
@@ -51,10 +51,10 @@ func (p *RTCMParser) Process(data []byte) []RTCMMessage {
 					Payload:     make([]byte, length),
 					Valid:       true,
 				}
-				
+
 				// Copy payload
 				copy(message.Payload, p.buffer[3:3+length])
-				
+
 				// Add to result
 				messages = append(messages, message)
 

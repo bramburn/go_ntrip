@@ -67,7 +67,7 @@ func (p *MockSerialPort) ListPorts() ([]string, error) {
 
 func (p *MockSerialPort) GetPortDetails() ([]*enumerator.PortDetails, error) {
 	return []*enumerator.PortDetails{
-		{Name: "COM1", IsUSB: true, VID: 0x1234, PID: 0x5678, Product: "Mock GNSS"},
+		{Name: "COM1", IsUSB: true, VID: "1234", PID: "5678", Product: "Mock GNSS"},
 		{Name: "COM2", IsUSB: false},
 	}, nil
 }

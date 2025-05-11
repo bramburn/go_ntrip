@@ -12,22 +12,22 @@ import (
 type SerialPort interface {
 	// Open opens the serial port with the given configuration
 	Open(portName string, baudRate int) error
-	
+
 	// Close closes the serial port
 	Close() error
-	
+
 	// Read reads data from the port
 	Read(buffer []byte) (int, error)
-	
+
 	// Write writes data to the port
 	Write(data []byte) (int, error)
-	
+
 	// SetReadTimeout sets the read timeout for the port
 	SetReadTimeout(timeout time.Duration) error
-	
+
 	// ListPorts lists all available serial ports
 	ListPorts() ([]string, error)
-	
+
 	// GetPortDetails returns detailed information about available ports
 	GetPortDetails() ([]*enumerator.PortDetails, error)
 }

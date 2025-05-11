@@ -21,8 +21,8 @@ type CLI struct {
 // NewCLI creates a new CLI
 func NewCLI(device device.GNSSDevice) *CLI {
 	return &CLI{
-		device: device,
-		reader: bufio.NewReader(os.Stdin),
+		device:  device,
+		reader:  bufio.NewReader(os.Stdin),
 		running: false,
 	}
 }
@@ -81,26 +81,26 @@ func (c *CLI) handleCommand(command string) {
 	switch {
 	case command == "help":
 		c.showHelp()
-		
+
 	case command == "monitor":
 		fmt.Println("Monitoring raw device output. Press Enter to stop.")
 		c.monitorRawData()
-		
+
 	case command == "nmea":
 		fmt.Println("Monitoring and parsing NMEA sentences. Press Enter to stop.")
 		c.monitorNMEA()
-		
+
 	case command == "rtcm":
 		fmt.Println("Monitoring RTCM3.3 messages. Press Enter to stop.")
 		c.monitorRTCM()
-		
+
 	case command == "ubx":
 		fmt.Println("Monitoring UBX protocol messages. Press Enter to stop.")
 		c.monitorUBX()
-		
+
 	case strings.HasPrefix(command, "baudrate "):
 		c.changeBaudRate(command)
-		
+
 	case command != "":
 		c.sendCommand(command)
 	}
@@ -169,12 +169,12 @@ func (c *CLI) monitorNMEA() {
 
 	// Wait for Enter key to stop
 	c.reader.ReadString('\n')
-	
+
 	// Stop monitoring
 	if d, ok := c.device.(*device.TOPGNSSDevice); ok {
 		d.StopMonitoring()
 	}
-	
+
 	fmt.Println("\nStopped monitoring NMEA data.")
 }
 
@@ -230,7 +230,7 @@ func (c *CLI) sendCommand(command string) {
 	// Read response
 	buffer := make([]byte, 1024)
 	time.Sleep(500 * time.Millisecond) // Give device time to respond
-	
+
 	n, err := c.device.ReadRaw(buffer)
 	if err != nil {
 		fmt.Printf("Error reading response: %v\n", err)

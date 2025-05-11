@@ -16,16 +16,16 @@ import (
 func main() {
 	// Create serial port
 	serialPort := port.NewGNSSSerialPort()
-	
+
 	// Create GNSS device
 	gnssDevice := device.NewTOPGNSSDevice(serialPort)
-	
+
 	// Connect to device
 	portName := selectPort(gnssDevice)
 	if portName == "" {
 		log.Fatal("No port selected. Exiting.")
 	}
-	
+
 	fmt.Printf("Opening port %s with baud rate %d...\n", portName, 38400)
 	err := gnssDevice.Connect(portName, 38400)
 	if err != nil {
@@ -33,10 +33,10 @@ func main() {
 		return
 	}
 	defer gnssDevice.Disconnect()
-	
+
 	fmt.Println("Port opened successfully. Waiting for device to initialize...")
 	time.Sleep(2 * time.Second) // Give the device time to initialize
-	
+
 	// Verify connection
 	if !gnssDevice.VerifyConnection(5 * time.Second) {
 		fmt.Println("Unable to verify GNSS data. The device may not be sending data.")
@@ -49,7 +49,7 @@ func main() {
 			return
 		}
 	}
-	
+
 	// Create and start CLI
 	cli := ui.NewCLI(gnssDevice)
 	cli.Start()
@@ -62,17 +62,17 @@ func selectPort(device device.GNSSDevice) string {
 	if err != nil {
 		log.Fatalf("Error listing serial ports: %v", err)
 	}
-	
+
 	if len(ports) == 0 {
 		log.Fatal("No serial ports found. Please check your connections.")
 	}
-	
+
 	// If only one port is available, use it
 	if len(ports) == 1 {
 		fmt.Printf("Only one port available. Using %s\n", ports[0])
 		return ports[0]
 	}
-	
+
 	// Get port details for better information
 	details, err := device.GetPortDetails()
 	if err != nil {
@@ -92,14 +92,14 @@ func selectPort(device device.GNSSDevice) string {
 			fmt.Println(portInfo)
 		}
 	}
-	
+
 	// Prompt for selection
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("Enter port number (or 0 to exit): ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
-		
+
 		var selection int
 		_, err := fmt.Sscanf(input, "%d", &selection)
 		if err == nil {
@@ -117,14 +117,14 @@ func selectPort(device device.GNSSDevice) string {
 // handleConnectionError provides detailed error handling for connection issues
 func handleConnectionError(err error, portName string) {
 	log.Printf("Error opening serial port %s: %v", portName, err)
-	
+
 	fmt.Println("\nTroubleshooting tips:")
 	fmt.Println("1. Check if the GNSS receiver is properly connected")
 	fmt.Println("2. Verify that no other application is using the port")
 	fmt.Println("3. Try a different USB port")
 	fmt.Println("4. Check if the correct drivers are installed")
 	fmt.Println("5. Try restarting the GNSS receiver")
-	
+
 	// Check for specific error types
 	errStr := err.Error()
 	if strings.Contains(errStr, "access denied") || strings.Contains(errStr, "permission denied") {
