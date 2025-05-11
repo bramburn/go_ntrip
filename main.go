@@ -807,6 +807,27 @@ func displayUBXInfo(msgClass byte, msgID byte) {
 
 // changeBaudRate changes the baud rate of the serial connection
 func changeBaudRate(port serial.Port, newBaudRate int) {
+	// We need to store the port name before closing
+	// Since we can't directly access the port name from the interface,
+	// we'll need to ask the user for the port name again
+	fmt.Println("To change the baud rate, please enter the port name:")
+
+	// List available ports
+	ports, err := listPorts()
+	if err != nil {
+		log.Printf("Error listing serial ports: %v", err)
+		fmt.Println("Failed to change baud rate. Please restart the application.")
+		return
+	}
+
+	if len(ports) == 0 {
+		fmt.Println("No serial ports found. Please check your connections.")
+		return
+	}
+
+	// Select port to use
+	portName := selectPort(ports)
+
 	// Close the current port
 	port.Close()
 
@@ -820,15 +841,17 @@ func changeBaudRate(port serial.Port, newBaudRate int) {
 		StopBits: serial.OneStopBit,
 	}
 
-	// Get the port name from the current port
-	portInfo := port.(*serial.Port).GetPortInfo()
-	portName := portInfo.Name
-
 	newPort, err := serial.Open(portName, mode)
 	if err != nil {
 		log.Printf("Error reopening port with new baud rate: %v", err)
 		fmt.Println("Failed to change baud rate. Please restart the application.")
 		return
+	}
+
+	// Set read timeout on new port
+	err = newPort.SetReadTimeout(readTimeout)
+	if err != nil {
+		log.Printf("Warning: Error setting read timeout: %v", err)
 	}
 
 	// Replace the old port with the new one

@@ -1,18 +1,23 @@
-# Go NTRIP Client
+# Go NTRIP Client for TOPGNSS TOP708
 
-A Go application for communicating with GNSS receivers via serial USB connection.
+A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial USB connection.
 
 ## Features
 
 - Automatically detects and lists available serial ports
 - Provides detailed information about USB devices (VID/PID)
 - Interactive command interface for sending commands to the GNSS receiver
-- Continuous monitoring mode to observe GNSS data stream
+- Supports multiple data formats:
+  - NMEA-0183 sentences with detailed parsing and display
+  - RTCM3.3 messages for RTK corrections
+  - u-blox UBX protocol messages
+- Comprehensive error handling and connection troubleshooting
+- Baud rate adjustment capability
 
 ## Prerequisites
 
 - Go 1.16 or higher
-- Connected GNSS receiver via USB
+- Connected TOPGNSS TOP708 GNSS receiver via USB
 
 ## Installation
 
@@ -39,32 +44,57 @@ go run main.go
 
 Once the application is running:
 
-- Type commands to send directly to the GNSS receiver
-- Type `monitor` to continuously display data from the receiver
-- Type `exit` to quit the application
+- `monitor` - Continuously display raw data from the receiver
+- `nmea` - Monitor and parse NMEA sentences (GGA, RMC, GSV, GSA, GLL)
+- `rtcm` - Monitor RTCM3.3 messages
+- `ubx` - Monitor UBX protocol messages
+- `baudrate <rate>` - Change the baud rate (e.g., `baudrate 115200`)
+- `help` - Show available commands
+- `exit` - Quit the application
+
+You can also type any command to send directly to the GNSS receiver.
+
+## TOPGNSS TOP708 Specifications
+
+- Default baud rate: 38400 bps
+- Supported protocols:
+  - NMEA-0183 (standard sentences like $GNGGA, $GNGLL, $GNRMC)
+  - RTCM3.3 for RTK corrections
+  - u-blox UBX binary protocol
+- Multi-constellation support: GPS, GLONASS, Galileo, BeiDou
 
 ## Configuration
 
-You can modify the following constants in `main.go` to match your GNSS receiver's requirements:
+The application is pre-configured for the TOPGNSS TOP708 with:
 
-- `defaultBaudRate`: Set the baud rate (default: 9600)
-- `defaultPort`: Specify a default port to use (leave empty to select at runtime)
-- `readTimeout`: Adjust the read timeout (default: 500ms)
+- Default baud rate: 38400 bps
+- Port selection: Always prompts for selection at startup
+- Read timeout: 500ms
 
 ## Common GNSS Commands
 
-Depending on your GNSS receiver, you might use commands such as:
+For TOPGNSS TOP708 receivers, you might use commands such as:
 
-- `$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28` - Enable NMEA GGA and RMC sentences
-- `$PMTK220,1000*1F` - Set position update rate to 1Hz
+- `$PUBX,40,GGA,0,1,0,0,0,0*5B` - Enable NMEA GGA sentences
+- `$PUBX,40,RMC,0,1,0,0,0,0*46` - Enable NMEA RMC sentences
+- `$PUBX,40,GSV,0,1,0,0,0,0*59` - Enable NMEA GSV sentences
 
-Note: Commands may vary based on your specific GNSS receiver model.
+## Troubleshooting
+
+If you encounter connection issues:
+
+1. Verify the GNSS receiver is properly connected
+2. Check that no other application is using the port
+3. Try a different USB port
+4. Ensure the correct drivers are installed
+5. Try restarting the GNSS receiver
 
 ## Future Development
 
 - NTRIP client functionality for RTK corrections
 - Configuration file support
 - Data logging capabilities
+- Support for additional GNSS receivers
 
 ## License
 
