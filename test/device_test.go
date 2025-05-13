@@ -152,17 +152,38 @@ func TestTOPGNSSDevice(t *testing.T) {
 		t.Errorf("Expected written data %q, got %q", expected, string(mockPort.written))
 	}
 
+	// Clear written data
+	mockPort.written = []byte{}
+
+	// Test writing raw data
+	testData := []byte{0x01, 0x02, 0x03, 0x04}
+	var writeN int
+	writeN, err = gnssDevice.WriteRaw(testData)
+	if err != nil {
+		t.Errorf("Expected successful raw write, got error: %v", err)
+	}
+
+	if writeN != len(testData) {
+		t.Errorf("Expected to write %d bytes, got %d", len(testData), writeN)
+	}
+
+	if string(mockPort.written) != string(testData) {
+		t.Errorf("Expected written data %v, got %v", testData, mockPort.written)
+	}
+
 	// Test reading data
-	mockPort.data = []byte("$GNGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n")
+	expectedData := []byte("$GNGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n")
+	mockPort.data = expectedData
 
 	buffer := make([]byte, 1024)
-	n, err := gnssDevice.ReadRaw(buffer)
+	var readN int
+	readN, err = gnssDevice.ReadRaw(buffer)
 	if err != nil {
 		t.Errorf("Expected successful read, got error: %v", err)
 	}
 
-	if n != len(mockPort.data) {
-		t.Errorf("Expected to read %d bytes, got %d", len(mockPort.data), n)
+	if readN != len(expectedData) {
+		t.Errorf("Expected to read %d bytes, got %d", len(expectedData), readN)
 	}
 
 	// Test verification

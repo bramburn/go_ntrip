@@ -30,6 +30,9 @@ type GNSSDevice interface {
 	// ReadRaw reads raw data from the device
 	ReadRaw(buffer []byte) (int, error)
 
+	// WriteRaw writes raw data to the device
+	WriteRaw(data []byte) (int, error)
+
 	// WriteCommand sends a command to the device
 	WriteCommand(command string) error
 

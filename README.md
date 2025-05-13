@@ -3,7 +3,7 @@
 [![Go Tests](https://github.com/bramburn/go_ntrip/actions/workflows/go-test.yml/badge.svg)](https://github.com/bramburn/go_ntrip/actions/workflows/go-test.yml)
 [![Go CI](https://github.com/bramburn/go_ntrip/actions/workflows/go-ci.yml/badge.svg)](https://github.com/bramburn/go_ntrip/actions/workflows/go-ci.yml)
 
-A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial USB connection.
+A Go application for NTRIP client functionality and RTK position processing.
 
 ## Features
 
@@ -14,6 +14,10 @@ A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial
   - NMEA-0183 sentences with detailed parsing and display
   - RTCM3.3 messages for RTK corrections
   - u-blox UBX protocol messages
+- NTRIP client functionality for connecting to NTRIP servers
+- Built-in RTK processing for GNSS positioning
+  - Position averaging for improved accuracy
+  - Direct RTCM data processing without requiring external hardware
 - Comprehensive error handling and troubleshooting tips
 - Modular design following SOLID principles
 
@@ -23,11 +27,19 @@ A Go application for communicating with TOPGNSS TOP708 GNSS receivers via serial
 go_ntrip/
 ├── build/              # Build output directory
 ├── cmd/                # Application entry points
-│   └── gnss/           # Main GNSS application
+│   ├── gnss/           # Main GNSS application
+│   ├── ntrip-client/   # NTRIP client application
+│   ├── ntrip-avg/      # NTRIP position averaging application
+│   ├── ntrip-rtk/      # NTRIP RTK processing application
+│   ├── ntrip-server/   # NTRIP server application
+│   └── relay/          # NTRIP relay application
 ├── internal/           # Private application code
 │   ├── device/         # GNSS device communication
+│   ├── ntrip/          # NTRIP client functionality
 │   ├── parser/         # NMEA/RTCM/UBX parsers
 │   ├── port/           # Serial port handling
+│   ├── position/       # Position data handling
+│   ├── rtk/            # RTK processing functionality
 │   └── ui/             # User interface code
 ├── pkg/                # Public packages
 ├── scripts/            # Build scripts
@@ -87,6 +99,8 @@ Once the application is running:
 - `nmea` - Monitor and parse NMEA sentences (GGA, RMC, GSV, GSA, GLL)
 - `rtcm` - Monitor RTCM3.3 messages
 - `ubx` - Monitor UBX protocol messages
+- `ntrip-pos` - Connect to NTRIP server and get fixed position
+- `ntrip-avg` - Connect to NTRIP server and average position samples
 - `baudrate <rate>` - Change the baud rate (e.g., `baudrate 115200`)
 - `help` - Show available commands
 - `exit` - Quit the application
@@ -154,12 +168,84 @@ The modular design makes it easy to add new features:
 2. To add a new device, implement the `GNSSDevice` interface in the `internal/device` package
 3. To add a new UI, implement a new UI in the `internal/ui` package
 
+## NTRIP Client Usage
+
+The application includes NTRIP client functionality for connecting to NTRIP servers and obtaining RTK corrections.
+
+### Using the CLI Commands
+
+#### Getting a Single Fixed Position
+
+When the main application is running, use the `ntrip-pos` command to connect to an NTRIP server and get a fixed position:
+
+1. Enter the NTRIP server details when prompted (address, port, username, password, mountpoint)
+2. The application will connect to the server and process RTCM data directly
+3. Once an RTK fixed position is calculated, it will be saved to a JSON file in the application directory
+
+#### Averaging Position Samples
+
+Use the `ntrip-avg` command to connect to an NTRIP server and average multiple position samples for improved accuracy:
+
+1. Enter the NTRIP server details when prompted (address, port, username, password, mountpoint)
+2. Specify the minimum fix quality (4=RTK Fixed, 5=Float RTK) and number of samples to collect
+3. The application will process RTCM data, calculate RTK solutions, and average the specified number of samples
+4. The averaged position with statistics will be saved to a JSON file
+
+### Using the Standalone NTRIP Applications
+
+#### NTRIP Client for Single Position
+
+You can use the standalone NTRIP client application to get a single fixed position:
+
+```
+go run cmd/ntrip-client/main.go -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -output base_position.json
+```
+
+Or with the built executable:
+
+```
+build/ntrip-client.exe -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH
+```
+
+#### NTRIP Position Averager
+
+For more accurate positioning, use the position averaging application:
+
+```
+go run cmd/ntrip-avg/main.go -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60 -output base_position_avg.json
+```
+
+Or with the built executable:
+
+```
+build/ntrip-avg.exe -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60
+```
+
+#### NTRIP RTK Processor
+
+For direct RTK processing of RTCM data:
+
+```
+go run cmd/ntrip-rtk/main.go -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60 -output rtk_position.json
+```
+
+Or with the built executable:
+
+```
+build/ntrip-rtk.exe -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60
+```
+
+Command-line options:
+- `-min-fix` - Minimum fix quality (4=RTK Fixed, 5=Float RTK)
+- `-samples` - Number of position samples to collect and average
+- `-timeout` - Maximum time to wait for samples (default: 10 minutes)
+
 ## Future Development
 
-- NTRIP client functionality for RTK corrections
 - Configuration file support
 - Data logging capabilities
 - Support for additional GNSS receivers
+- Web interface for monitoring and configuration
 
 ## License
 

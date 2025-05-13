@@ -116,6 +116,15 @@ func (d *TOPGNSSDevice) ReadRaw(buffer []byte) (int, error) {
 	return d.serialPort.Read(buffer)
 }
 
+// WriteRaw writes raw data to the device
+func (d *TOPGNSSDevice) WriteRaw(data []byte) (int, error) {
+	if !d.IsConnected() {
+		return 0, fmt.Errorf("device not connected")
+	}
+
+	return d.serialPort.Write(data)
+}
+
 // WriteCommand sends a command to the device
 func (d *TOPGNSSDevice) WriteCommand(command string) error {
 	if !d.IsConnected() {
