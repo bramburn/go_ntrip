@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-gnss/rtcm"
 	"go.bug.st/serial"
 	"go.bug.st/serial/enumerator"
 )
@@ -22,6 +23,15 @@ const (
 	protocolNMEA = "NMEA-0183"
 	protocolRTCM = "RTCM3.3"
 	protocolUBX  = "UBX"
+
+	// Log file
+	logFileName = "rtk.log"
+
+	// RTK status constants
+	rtkStatusNone   = 0
+	rtkStatusSingle = 1
+	rtkStatusFloat  = 2
+	rtkStatusFix    = 4
 )
 
 // NMEA sentence structure
@@ -40,6 +50,22 @@ type UBXMessage struct {
 	Payload []byte
 	Valid   bool
 }
+
+// RTKStatus represents the current RTK status
+type RTKStatus struct {
+	Status    int       // RTK status (NONE, SINGLE, FLOAT, FIX)
+	Time      time.Time // Time of the status
+	Latitude  float64   // Latitude in degrees
+	Longitude float64   // Longitude in degrees
+	Altitude  float64   // Altitude in meters
+	NSats     int       // Number of satellites
+	HDOP      float64   // Horizontal dilution of precision
+	Age       float64   // Age of differential (seconds)
+	Accuracy  float64   // Estimated horizontal accuracy (meters)
+}
+
+// RTCMFilter is a function that filters RTCM messages
+type RTCMFilter func(msg rtcm.Message) bool
 
 func main() {
 	// List available ports with details

@@ -9,7 +9,7 @@ import (
 )
 
 func TestRTKIntegration(t *testing.T) {
-	// Create RTK processor
+	// Create RTK processor with default kinematic mode
 	processor := rtk.NewProcessor()
 
 	// Create position averager
@@ -77,7 +77,7 @@ func TestRTKIntegration(t *testing.T) {
 }
 
 func TestRTKProcessorSolutionChannel(t *testing.T) {
-	// Create RTK processor
+	// Create RTK processor with default kinematic mode
 	processor := rtk.NewProcessor()
 
 	// Start processing
@@ -100,5 +100,41 @@ func TestRTKProcessorSolutionChannel(t *testing.T) {
 		}
 	case <-time.After(1 * time.Second):
 		t.Fatal("Timeout waiting for solution")
+	}
+}
+
+func TestRTKStaticMode(t *testing.T) {
+	// Create RTK processor with static mode
+	processor := rtk.NewProcessorWithMode("static")
+
+	// Verify mode is set correctly
+	if processor.GetMode() != "static" {
+		t.Errorf("Expected mode 'static', got '%s'", processor.GetMode())
+	}
+
+	// Process some RTCM data
+	rtcmData := make([]byte, 2000)
+	for i := range rtcmData {
+		rtcmData[i] = byte(i % 256)
+	}
+
+	// Process data
+	processor.ProcessRTCM(rtcmData)
+
+	// Wait for solution to be generated
+	time.Sleep(10 * time.Millisecond)
+
+	// Get last solution
+	solution := processor.GetLastSolution()
+	if solution == nil {
+		t.Fatal("Expected non-nil solution")
+	}
+
+	// Convert to position
+	pos := solution.ToPosition()
+
+	// Verify position has appropriate fix quality for static mode
+	if pos.FixQuality < rtk.StatusDGPS {
+		t.Errorf("Expected fix quality >= %d, got %d", rtk.StatusDGPS, pos.FixQuality)
 	}
 }

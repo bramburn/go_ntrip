@@ -26,6 +26,7 @@ func main() {
 	minFixQuality := flag.Int("min-fix", 4, "Minimum fix quality (4=RTK Fixed, 5=Float RTK)")
 	sampleCount := flag.Int("samples", 60, "Number of samples to collect")
 	timeout := flag.Duration("timeout", 10*time.Minute, "Timeout for connection")
+	mode := flag.String("mode", "kinematic", "Positioning mode (static or kinematic)")
 	flag.Parse()
 
 	// Check required parameters
@@ -97,8 +98,10 @@ func main() {
 		position.GetFixQualityDescription(*minFixQuality))
 	fmt.Printf("Will collect %d samples. Press Ctrl+C to stop early.\n", *sampleCount)
 
-	// Create RTK processor
-	processor := rtk.NewProcessor()
+	// Create RTK processor with the specified mode
+	processor := rtk.NewProcessorWithMode(*mode)
+
+	fmt.Printf("Using %s positioning mode\n", *mode)
 
 	// Create position averager
 	averager := position.NewPositionAverager(*minFixQuality)

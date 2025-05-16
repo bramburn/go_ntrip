@@ -226,19 +226,49 @@ build/ntrip-avg.exe -address 192.168.0.64 -port 2101 -user reach -pass emlidreac
 For direct RTK processing of RTCM data:
 
 ```
-go run cmd/ntrip-rtk/main.go -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60 -output rtk_position.json
+go run cmd/ntrip-rtk/main.go -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60 -mode static -output rtk_position.json
 ```
 
 Or with the built executable:
 
 ```
-build/ntrip-rtk.exe -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60
+build/ntrip-rtk.exe -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60 -mode static
 ```
 
 Command-line options:
 - `-min-fix` - Minimum fix quality (4=RTK Fixed, 5=Float RTK)
 - `-samples` - Number of position samples to collect and average
 - `-timeout` - Maximum time to wait for samples (default: 10 minutes)
+- `-mode` - Positioning mode (`static` or `kinematic`, default: `kinematic`)
+  - Use `static` mode for base station setup to improve position stability
+  - Use `kinematic` mode for rovers or when the receiver is moving
+
+## RTK Implementation
+
+The application implements Real-Time Kinematic (RTK) positioning using RTCM data from NTRIP servers. The RTK processor:
+
+1. Parses RTCM messages from the data stream
+2. Processes specific message types:
+   - Message 1004: GPS L1/L2 observations
+   - Message 1019: GPS ephemeris
+   - Messages 1005/1006: Station coordinates (used for static mode)
+3. Computes RTK solutions based on the collected data
+4. Supports two positioning modes:
+   - **Static Mode**: Optimized for base station setup, uses station coordinates when available
+   - **Kinematic Mode**: Suitable for rovers or moving receivers
+
+### Static Mode for Base Stations
+
+When setting up a base station, use the static mode for improved position stability:
+
+```
+go run cmd/ntrip-rtk/main.go -address 192.168.0.64 -port 2101 -user reach -pass emlidreach -mount REACH -min-fix 4 -samples 60 -mode static
+```
+
+In static mode, the RTK processor:
+- Uses RTCM station coordinates (message types 1005/1006) when available
+- Applies more aggressive filtering to reduce position jitter
+- Averages multiple samples for improved accuracy
 
 ## Future Development
 
@@ -246,6 +276,7 @@ Command-line options:
 - Data logging capabilities
 - Support for additional GNSS receivers
 - Web interface for monitoring and configuration
+- Advanced RTK algorithms for improved accuracy
 
 ## License
 
